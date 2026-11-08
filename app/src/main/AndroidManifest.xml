@@ -6,17 +6,17 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/bmi_logo"
+        android:icon="@drawable/fitness_icon"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/bmi_logo"
+        android:roundIcon="@drawable/fitness_icon"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BMICalculator">
+        android:theme="@style/Theme.FitnessStepCounter">
 
         <activity
             android:name="s3645164.fitnessstepcounter.prudhvi.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.BMICalculator">
+            android:theme="@style/Theme.FitnessStepCounter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

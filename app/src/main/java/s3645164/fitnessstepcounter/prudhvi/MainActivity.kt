@@ -1,16 +1,27 @@
 package s3645164.fitnessstepcounter.prudhvi
 
+import android.hardware.biometrics.BiometricManager
+import android.hardware.biometrics.BiometricPrompt
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,27 +29,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
-import s3645164.fitnessstepcounter.prudhvi.ui.theme.BMICalculatorTheme
-
+import s3645164.fitnessstepcounter.prudhvi.ui.theme.FitnessStepsCounter
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BMICalculatorTheme {
+            FitnessStepsCounter {
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -50,6 +61,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 @Composable
 fun AppNavigationMain() {
@@ -65,21 +77,17 @@ fun AppNavigationMain() {
         composable(Screen.Splash.route) {
             SplashScreen(
                 onNavigate = {
-                    if (UserDetails.getUserLoginStatus(context)) {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Splash.route) { inclusive = true }
-                        }
-                    } else {
+
                         navController.navigate(Screen.Login.route) {
                             popUpTo(Screen.Splash.route) { inclusive = true }
                         }
-                    }
+
                 }
             )
         }
 
         composable(Screen.Login.route) {
-            LoginScreen(
+            UserLoginScreen(
                 onLoginSuccess = {
 
                     navController.navigate(Screen.Home.route) {
@@ -93,36 +101,27 @@ fun AppNavigationMain() {
         }
 
         composable(Screen.Register.route) {
-            RegisterScreen(
+            CreateAccountScreen(
                 onBackToLogin = {
                     navController.popBackStack()
                 }
             )
         }
 
-        composable(Screen.Home.route) {
-            HomeScreen(navController)
-        }
 
-        composable(Screen.BMICalculator.route) {
-            BMICalculatorScreen(onBack = {
-                navController.popBackStack()
-            })
-        }
-        composable(Screen.BMICategory.route) {
-            BMICategoryScreen(
-                onBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-        composable(Screen.Profile.route) {
-            ProfileScreen(navController)
-        }
-        composable(Screen.About.route) {
-            AboutScreen(navController)
-        }
+
+
     }
+}
+
+sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
+    object Login : Screen("login")
+    object Register : Screen("register")
+    object Home : Screen("home")
+
+
+
 }
 
 @Composable
@@ -133,71 +132,105 @@ fun SplashScreen(onNavigate: () -> Unit) {
         onNavigate()
     }
 
-    SplashScreen()
+    LaunchView()
 
 
 }
 
 
 @Composable
-fun SplashScreen() {
+fun LaunchView() {
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                color = Color(0xFF1976D2),
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(color = colorResource(id = R.color.SoftBlue)),
+        contentAlignment = Alignment.Center
     ) {
-
-        Spacer(modifier = Modifier.weight(1f))
-
-
-
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = colorResource(id = R.color.white),
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
-            Image(
+
+
+            Card(
                 modifier = Modifier
-                    .size(70.dp),
-                painter = painterResource(id = R.drawable.bmi_logo),
-                contentDescription = "BMI Calculator"
-            )
+                    .padding(horizontal = 12.dp)
+                    .clip(RoundedCornerShape(26.dp)),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
 
-            Text(
-                text = "BMI Calculator App",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-            )
+            ) {
+                Button(
+                    onClick = { },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    contentPadding = PaddingValues(vertical = 12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.CoralRose),
+                        contentColor = colorResource(
+                            id = R.color.white
+                        )
+                    ),
+                    shape = RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomStart = 0.dp,
+                        bottomEnd = 0.dp
+                    )
+                ) {
+                    Text(
+                        text = "Fitness Steps Counter",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-            Text(
-                text = "By",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-            )
+                Spacer(modifier = Modifier.height(18.dp))
 
-            Text(
-                text = "Jeevan Reddy",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
-            )
+                Image(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    painter = painterResource(id = R.drawable.fitness_icon),
+                    contentDescription = "Fitness Steps Counter",
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+
+                Button(
+                    onClick = {  },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
+                    contentPadding = PaddingValues(vertical = 12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.CoralRose),
+                        contentColor = colorResource(
+                            id = R.color.white
+                        )
+                    ),
+                    shape = RoundedCornerShape(
+                        topStart = 0.dp,
+                        topEnd = 0.dp,
+                        bottomStart = 16.dp,
+                        bottomEnd = 16.dp
+                    )
+                ) {
+                    Text(
+                        text = "By\nPrudhvi",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                    )
+                }
+
+            }
 
         }
-
-
-
-
-        Spacer(modifier = Modifier.weight(1f))
-
     }
+
 }
 
-@Preview(showBackground = true)
-@Composable
-fun SplashScreenPreview() {
-    SplashScreen()
-}
+
+
