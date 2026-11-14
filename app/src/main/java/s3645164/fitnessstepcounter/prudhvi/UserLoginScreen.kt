@@ -1,6 +1,8 @@
 package s3645164.fitnessstepcounter.prudhvi
 
+
 import android.app.Activity
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.database.FirebaseDatabase
 
 
 @Composable
@@ -172,7 +175,15 @@ fun UserLoginScreen(
                         }
 
                         else -> {
-                           //call login function
+                            val testerData = TesterData(
+                                "",
+                                mail,
+                                "",
+                                "", "",
+                                password
+                            )
+
+                            loginUser(testerData, context, onLoginSuccess)
                         }
 
                     }
@@ -222,6 +233,42 @@ fun UserLoginScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
+
+    }
+}
+
+fun loginUser(testerData: TesterData, context: Context, onLoginSuccess: () -> Unit) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference =
+        firebaseDatabase.getReference("UsersData").child(testerData.emailid.replace(".", ","))
+
+    databaseReference.get().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val dbData = task.result?.getValue(TesterData::class.java)
+            if (dbData != null) {
+                if (dbData.password == testerData.password) {
+
+                    AppUserData.saveLoginStatus(context, true)
+                    AppUserData.saveUserName(context, dbData.name)
+                    AppUserData.saveUserEmail(context, dbData.emailid)
+
+                    onLoginSuccess.invoke()
+
+                } else {
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } else {
+                Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
 
     }
 }

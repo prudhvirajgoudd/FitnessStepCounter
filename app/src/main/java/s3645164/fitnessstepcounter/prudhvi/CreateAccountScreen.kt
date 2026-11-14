@@ -2,7 +2,9 @@ package s3645164.fitnessstepcounter.prudhvi
 
 
 import android.app.Activity
+import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -17,10 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -41,10 +43,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.firebase.database.FirebaseDatabase
 
 
 @Composable
@@ -58,6 +62,7 @@ fun CreateAccountScreen(onBackToLogin: () -> Unit) {
     var password by remember { mutableStateOf("") }
 
     val context = LocalContext.current as Activity
+
 
     Column(
         modifier = Modifier
@@ -205,7 +210,7 @@ fun CreateAccountScreen(onBackToLogin: () -> Unit) {
                         Spacer(modifier = Modifier.width(6.dp))
 
                         Icon(
-                            imageVector = Icons.Default.List,
+                            imageVector = Icons.Default.Height,
                             contentDescription = "Height Icon"
                         )
                         Spacer(modifier = Modifier.width(6.dp))
@@ -236,10 +241,9 @@ fun CreateAccountScreen(onBackToLogin: () -> Unit) {
                         Spacer(modifier = Modifier.width(6.dp))
 
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.Default.MonitorWeight,
                             contentDescription = "Weight Icon"
                         )
-
                         Spacer(modifier = Modifier.width(6.dp))
                         Spacer(
                             modifier = Modifier
@@ -321,7 +325,7 @@ fun CreateAccountScreen(onBackToLogin: () -> Unit) {
                                 weight,
                                 password
                             )
-                            //Call register
+                            registerUser(testerData,context,onBackToLogin)
                         }
 
                     }
@@ -375,7 +379,36 @@ fun CreateAccountScreen(onBackToLogin: () -> Unit) {
     }
 }
 
+fun registerUser(testerData: TesterData, context: Context,onRegistered: () -> Unit) {
 
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("UsersData")
+
+    databaseReference.child(testerData.emailid.replace(".", ","))
+        .setValue(testerData)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
+                    .show()
+
+                onRegistered.invoke()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Registration Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        .addOnFailureListener { _ ->
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+}
 
 data class TesterData(
     var name : String = "",

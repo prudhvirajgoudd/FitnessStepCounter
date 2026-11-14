@@ -65,4 +65,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation("androidx.compose:compose-bom:latest-version")
+
+    implementation(libs.material.icons.extended)
+
 }
